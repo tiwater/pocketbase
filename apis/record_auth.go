@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/labstack/echo/v5"
 	"github.com/pocketbase/dbx"
@@ -144,16 +145,23 @@ func (api *recordAuthApi) authMethods(c echo.Context) error {
 			urlOpts = append(urlOpts, oauth2.SetAuthURLParam("response_mode", "query"))
 		}
 
+		authUrl := provider.BuildAuthUrl(
+			state,
+			urlOpts...,
+		) + "&redirect_uri="
+
+		if name == auth.NameWeChat {
+			// see https://developers.weixin.qq.com/doc/oplatform/Website_App/WeChat_Login/Wechat_Login.html
+			authUrl = strings.Replace(authUrl, "client_id", "appid", 1)
+		}
+
 		result.AuthProviders = append(result.AuthProviders, providerInfo{
 			Name:                name,
 			State:               state,
 			CodeVerifier:        codeVerifier,
 			CodeChallenge:       codeChallenge,
 			CodeChallengeMethod: codeChallengeMethod,
-			AuthUrl: provider.BuildAuthUrl(
-				state,
-				urlOpts...,
-			) + "&redirect_uri=", // empty redirect_uri so that users can append their redirect url
+			AuthUrl:             authUrl, // empty redirect_uri so that users can append their redirect url
 		})
 	}
 

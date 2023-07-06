@@ -180,4 +180,13 @@ func TestNewProviderByName(t *testing.T) {
 	if _, ok := p.(*auth.Apple); !ok {
 		t.Error("Expected to be instance of *auth.Apple")
 	}
+
+	// wechat
+	p, err = auth.NewProviderByName(auth.NameWeChat)
+	if err != nil {
+		t.Errorf("Expected nil, got error %v", err)
+	}
+	if _, ok := p.(*auth.WeChat); !ok {
+		t.Error("Expected to be instance of *auth.WeChat")
+	}
 }
