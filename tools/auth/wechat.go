@@ -48,8 +48,8 @@ type tokenJSON struct {
 	// error fields
 	// https://developers.weixin.qq.com/doc/oplatform/Website_App/WeChat_Login/Wechat_Login.html
 	// {"errcode":40030,"errmsg":"invalid refresh_token"}
-	ErrorCode    string `json:"errcode"`
-	ErrorMessage string `json:"errmsg"`
+	ErrorCode    json.Number `json:"errcode"`
+	ErrorMessage string      `json:"errmsg"`
 }
 
 func (e *tokenJSON) expiry() (t time.Time) {
@@ -96,9 +96,9 @@ func (p *WeChat) FetchToken(code string, opts ...oauth2.AuthCodeOption) (*oauth2
 		if failureStatus {
 			return nil, retrieveError
 		}
-		return nil, fmt.Errorf("oauth2: cannot parse json: %v", err)
+		return nil, fmt.Errorf("oauth2: cannot parse json (%v): %v", string(body), err)
 	}
-	retrieveError.ErrorCode = tj.ErrorCode
+	retrieveError.ErrorCode = tj.ErrorCode.String()
 	retrieveError.ErrorDescription = tj.ErrorMessage
 	token = &oauth2.Token{
 		AccessToken:  tj.AccessToken,
